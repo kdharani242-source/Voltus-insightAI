@@ -327,7 +327,6 @@ module voltus_insightai_top #(
     );
 endmodule
 
-
 // Code your testbench here
 // or browse Examples
 `timescale 1ns/1ps
@@ -595,8 +594,6 @@ initial begin
 end
  
 endmodule
-
-
 
 //output
 # KERNEL: ====================================================

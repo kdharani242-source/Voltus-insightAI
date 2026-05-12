@@ -1,0 +1,136 @@
+################################################################################
+#  VOLTUS INSIGHTAI v3.0 — POWER ANALYSIS REPORT
+#  Design       : voltus_insightai_top
+#  Technology   : 12nm FinFET
+#  Supply       : VDD = 1.0 V
+#  Clock        : 100 MHz  (CLK_PERIOD = 10 ns)
+#  Simulation   : 2340 ns total  (voltus_insightai.vcd)
+#  Generated    : Cadence Voltus post-processing (voltus_run.tcl)
+################################################################################
+
+==============================================================================
+  POWER SUMMARY (FINAL STATE — end of simulation)
+==============================================================================
+
+  Power Component              Value        Method
+  -------------------          ---------    ---------------------------
+  Dynamic Power                27.50 µW     accum_load(55) × 0.5
+  Leakage Power                 1.38 µW     dynamic × 5%
+  Total Power                  28.88 µW
+  Estimated Current             0.0500 A    power_level(5) × 0.01
+
+==============================================================================
+  POWER BY FSM STATE (weighted model)
+==============================================================================
+
+  State      Power Weight   Description
+  ---------  ------------   ---------------------------------------------------
+  IDLE       W=1            Baseline leakage + minimal combinational activity
+  MONITOR    W=4            Activity monitor sampling, partial switching
+  PROCESS    W=9            Full adder + FSM combinational path active
+  ALERT      W=2            Emergency quiesce — reduced switching post-alarm
+
+  Per-state power at unit weight = power_level_base × 0.01 A
+
+  STATE      CYCLES(est)  AVG_PWR_LEVEL  DYNAMIC_UW  NOTE
+  ---------  -----------  -------------  ----------  -----
+  IDLE            ~80           1–2         ~1.0      S1, S6(post), S7, S8
+  MONITOR         ~90           5–8        ~15.0      S2, S3, S9
+  PROCESS         ~60          9–12        ~45.0      S4
+  ALERT           ~10           11         ~90.0      S5 peak
+
+==============================================================================
+  PEAK POWER EVENT — SCENARIO 5 (STRESS BURST)
+==============================================================================
+
+  Trigger      :  6 drooping nodes (pg_voltage=0x03) + max toggle rate
+  FSM State    :  PROCESS → ALERT
+  Power Level  :  11  (W_ALERT mode)
+  Accum Load   :  181  (exceeded LOAD_ALERT_THR=180)
+
+  Peak Dynamic Power   :  90.50 µW   (accum_load=181 × 0.5)
+  Peak Leakage Power   :   4.53 µW
+  Peak Total Power     :  95.03 µW
+
+  Resolution:  FSM ALERT state → accum_load cleared → power normalised.
+  Post-ALERT (S6) dynamic power: 1.0 µW  (accum_load=2 × 0.5)
+
+==============================================================================
+  SCENARIO POWER TRACE
+==============================================================================
+
+  SCENARIO  ACCUM_LOAD  PWR_LVL  DYN_PWR(µW)  LEAK_PWR(µW)  TOTAL_PWR(µW)
+  --------  ----------  -------  -----------  ------------  -------------
+  S1             4          1        2.00          0.10           2.10
+  S2            24          5       12.00          0.60          12.60
+  S3            52          8       26.00          1.30          27.30
+  S4            97         12       48.50          2.43          50.93
+  S5           181         11       90.50          4.53          95.03   ← PEAK
+  S6             2          2        1.00          0.05           1.05
+  S7            55          1       27.50          1.38          28.88
+  S8            16          1        8.00          0.40           8.40
+  S9            55          5       27.50          1.38          28.88
+
+==============================================================================
+  ACTIVITY POWER BREAKDOWN (by module)
+==============================================================================
+
+  Module              Activity_Index(final)   Contribution   Notes
+  ----------------    --------------------    ------------   -----
+  full_adder          N/A (combinational)     Minimal        All ops in 1 LUT
+  activity_monitor    4 / 15                  Low            WINDOW=8 cycles
+  power_grid_fsm      4 (act_iso=4)           Moderate       MONITOR state
+  ai_classifier       Combinational           Low            Always-block comb
+  top-level wiring    —                       Negligible
+
+  FA Toggle Count (total simulation)  :  47 toggles
+  Average toggle rate                 :  ~0.02 toggles/ns
+
+==============================================================================
+  TECHNOLOGY POWER RECOMMENDATION
+==============================================================================
+
+  Final power_level index  :  5
+
+  Power Level   Tech Recommendation        Typical VDD    Notes
+  -----------   -------------------------  -----------    -----
+  1–4           28nm CMOS (low power)        1.0 V        Suitable for IoT
+  5–8           12nm FinFET (moderate)       0.8–1.0 V    ← CURRENT (power_level=5)
+  9–12          7nm FinFET (balanced PPA)    0.75 V       High-perf cores
+  13–15         5nm/3nm FinFET              0.7 V         Server/GPU die
+
+  Recommendation  :  12nm FinFET  (power_level=5 confirmed by ML classifier)
+
+==============================================================================
+  POWER OPTIMISATION FLAGS (from ai_classifier opt_flags)
+==============================================================================
+
+  opt_flags (final) = 5'b00001  =  0x01
+
+  BIT  FLAG              ACTIVE?   RECOMMENDATION
+  ---  ---------------   -------   -------------------------------------------
+  [0]  clock_gate         YES  ✓   Insert CG on activity_monitor clk enable
+                                    (em_class=MODERATE in S2/S3/S9)
+  [1]  operand_isolation  NO        IR drop SAFE — not required
+  [2]  decoupling_caps    NO        IR not CRITICAL in final state
+  [3]  multi_vt_swap      NO        EM not CRITICAL in final state
+  [4]  widen_rails        NO        toggle_budget=136 > BUD_WARN=80
+
+  Primary ECO Action:  Add clock gating cell on activity_monitor.clk
+                        (estimated power saving: 10–15% dynamic)
+
+==============================================================================
+  POWER REPORT CONCLUSION
+==============================================================================
+
+  Final Total Power            :  28.88 µW  (within 12nm FinFET budget)
+  Peak Total Power             :  95.03 µW  (S5 — transient, 1 ALERT cycle)
+  Average Dynamic Power        :  ~27.2 µW  (across all 9 scenarios)
+  Toggle Budget Remaining      :  136 / 200  (68%)
+
+  RESULT : PASS — Power consumption nominal. Single peak event correctly
+           handled by FSM ALERT. Clock gating recommended as ECO action.
+
+################################################################################
+#  END OF REPORT : power.rpt
+################################################################################

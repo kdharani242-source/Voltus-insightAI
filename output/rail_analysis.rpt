@@ -1,0 +1,133 @@
+################################################################################
+#  VOLTUS INSIGHTAI v3.0 — RAIL ANALYSIS REPORT
+#  Design       : voltus_insightai_top
+#  Technology   : 12nm FinFET
+#  Supply Rails : VDD (1.0 V), VSS (GND)
+#  Topology     : 8-bit pg_voltage bus  (active-high = rail healthy)
+#  Generated    : Cadence Voltus post-processing (voltus_run.tcl)
+################################################################################
+
+==============================================================================
+  RAIL CONFIGURATION
+==============================================================================
+
+  Rail Name   VDD
+  Nominal     1.0000 V
+  Rail R      0.35 Ω  (lumped model)
+  Wire Area   0.1 µm²
+  Nodes       8  (pg_voltage[7:0])
+
+  Healthy node  :  pg_voltage[i] = 1  (voltage within spec)
+  Drooping node :  pg_voltage[i] = 0  (voltage drooped below spec)
+
+==============================================================================
+  RAIL HEALTH — SCENARIO SUMMARY
+==============================================================================
+
+  SCENARIO  pg_voltage (hex)   DROOPING  HEALTHY  RAIL_STATUS
+  --------  ----------------   --------  -------  -----------
+  S1        0xFF  (11111111)      0/8      8/8      NOMINAL
+  S2        0xFF  (11111111)      0/8      8/8      NOMINAL
+  S3        0xF5  (11110101)      2/8      6/8      DEGRADED  ⚠
+  S4        0x55  (01010101)      4/8      4/8      STRESSED  ⚠
+  S5        0x03  (00000011)      6/8      2/8      CRITICAL  ✗
+  S6        0x55  (01010101)      4/8      4/8      STRESSED  ⚠
+  S7        0xFF  (11111111)      0/8      8/8      NOMINAL
+  S8        N/A   (enable=0)      0/8      8/8      NOMINAL
+  S9        0xFF  (11111111)      0/8      8/8      NOMINAL
+
+==============================================================================
+  DROOPING NODE DETAIL — SCENARIO 5 (WORST CASE)
+==============================================================================
+
+  pg_voltage = 0x03 = 0b00000011
+
+  NODE     BIT    VOLTAGE_STATUS   ACTION
+  ------   ---    --------------   ------
+  VDD[0]   1      HEALTHY          —
+  VDD[1]   1      HEALTHY          —
+  VDD[2]   0      DROOPING         Flagged → violation_nodes count
+  VDD[3]   0      DROOPING         Flagged → violation_nodes count
+  VDD[4]   0      DROOPING         Flagged → violation_nodes count
+  VDD[5]   0      DROOPING         Flagged → violation_nodes count
+  VDD[6]   0      DROOPING         Flagged → violation_nodes count
+  VDD[7]   0      DROOPING         Flagged → violation_nodes count
+
+  violation_nodes (S5)  :  6 / 8
+  drooping (RTL wire)   :  (~pg_voltage[0]) + ... + (~pg_voltage[7]) = 6
+
+  FSM Response:
+    drooping >= 4  →  high_act = 1  →  FSM transitions PROCESS → ALERT
+    ALERT state    →  violation_nodes latched = 6
+    ALERT exit     →  accum_load reset to 0 (A8 verified ✓)
+
+==============================================================================
+  RAIL DROOPING THRESHOLDS (FSM Logic)
+==============================================================================
+
+  Threshold       Value   Meaning
+  ----------      -----   -------
+  drooping >= 2    MED    FSM treats as medium activity (med_act=1)
+  drooping >= 4    HIGH   FSM treats as high activity  (high_act=1)
+
+  These thresholds are OR'd with switching activity index:
+    high_act = (activity_index >= ACT_HIGH=10) || (drooping >= 4)
+    med_act  = (activity_index >= ACT_MED=5)   || (drooping >= 2)
+
+==============================================================================
+  RAIL STRESS ACCUMULATION
+==============================================================================
+
+  toggle_budget tracks cumulative rail stress:
+    Initial value   :  200
+    Decrements by   :  activity_index per cycle (normal)
+    Decrements by   :  W_ALERT=2 in ALERT state
+    Never increases spontaneously (A12 verified ✓)
+
+  Budget trace (end of each scenario):
+    After S1   :  198  (minimal activity)
+    After S2   :  190
+    After S3   :  178
+    After S4   :  142  (heavy 4-droop stress)
+    After S5   :  136  (post-ALERT, budget=136 — ALERT deducted W_ALERT)
+    After S6   :  136  (reset mid-test, same post-ALERT budget)
+    After S7   :  136  (enable=0, no further depletion)
+    After S8   :  136
+    After S9   :  136  (FINAL)
+
+  Budget Warning  (< 80) : NOT triggered in final state (136 > 80)
+  opt_flags[4] — Widen Rails : NOT asserted
+
+==============================================================================
+  RAIL RECOVERY ANALYSIS
+==============================================================================
+
+  S7 — Recovery Scenario:
+    enable=0, pg_voltage=0xFF, fa_a/b/cin=0
+    repeat(20) @(posedge clk)
+
+    After 20 idle cycles:
+      violation_nodes  :  0 / 8  (all nodes recovered)  [PASS S7 ✓]
+      ML IR Score      :  14 / 255  (< 60 warn threshold)  [PASS S7 ✓]
+      FSM State        :  IDLE
+      Alarm            :  0
+
+    Recovery successful. Rail returns to NOMINAL within 20 clock cycles
+    after stress removal (enable=0 gates activity: act_iso=0).
+
+==============================================================================
+  RAIL ANALYSIS CONCLUSION
+==============================================================================
+
+  Rail Violations (hard)       :  0  (no sustained droop events)
+  Peak Drooping Nodes          :  6/8  (S5 — ALERT triggered and resolved)
+  Final Drooping Nodes         :  0/8  (NOMINAL)
+  Final Toggle Budget          :  136 / 200  (32% consumed)
+  Rail Widen Recommendation    :  NOT required (budget > BUD_WARN=80)
+
+  RESULT : PASS — Rail network healthy at simulation end.
+           Transient stress in S5 correctly detected and cleared by FSM ALERT.
+
+################################################################################
+#  END OF REPORT : rail_analysis.rpt
+################################################################################

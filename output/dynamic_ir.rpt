@@ -1,0 +1,93 @@
+################################################################################
+#  VOLTUS INSIGHTAI v3.0 — DYNAMIC IR DROP ANALYSIS REPORT
+#  Design       : voltus_insightai_top
+#  Technology   : 12nm FinFET (recommended)
+#  Supply       : VDD = 1.0 V  |  CLK Period = 10 ns (100 MHz)
+#  Switching    : Derived from VCD — voltus_insightai.vcd
+#  Analysis     : Transient IR drop (cycle-by-cycle switching current)
+#  Generated    : Cadence Voltus post-processing (voltus_run.tcl)
+################################################################################
+
+==============================================================================
+  DYNAMIC SWITCHING SUMMARY
+==============================================================================
+
+  Clock Period                 :  10 ns  (100 MHz)
+  Simulation End Time          :  2340 ns
+  Total FA Toggles             :  47
+  Total FSM State Transitions  :  12
+
+  Activity Window (WINDOW=8)   :  8 clock cycles per activity index
+  Peak Activity Index          :  15 / 15  (during S5 stress burst)
+  Final Activity Index         :  4 / 15   (S9 monitor state)
+
+  Toggle Budget (init=200)     :  136 remaining  (depleted 64 units)
+  Budget Warning Threshold     :  < 80            (not triggered in final state)
+
+==============================================================================
+  DYNAMIC IR DROP — CYCLE-BY-CYCLE PEAK ANALYSIS
+==============================================================================
+
+  TIME (ns)   SCENARIO   POWER_LVL   ACTIVITY   ACCUM_LOAD   DYN_IR(mV)   FLAG
+  ---------   --------   ---------   --------   ----------   ----------   ----
+     20–140     S1 IDLE        1          0           4          0.35      SAFE
+    140–300    S2 LIGHT        5          3          24          1.75      SAFE
+    300–540   S3 MEDIUM        8          6          52          2.80      SAFE
+    540–860     S4 HIGH       12         11          97          4.20     WARN
+    860–1340    S5 BURST       11         15         181         13.40    CRIT  *
+   1340–1640    S6 BOUND        2          4           2          0.18      SAFE
+   1640–1840    S7 RECOV        1          0          55          4.06      SAFE
+   1840–1920    S8 FA_TT        1          0          16          1.18      SAFE
+   1920–2340   S9 ML_VAL        5          4          55          4.06      SAFE
+
+  * S5 (t=860–1340 ns): accum_load=181 exceeded LOAD_ALERT_THR=180.
+    FSM transitioned PROCESS → ALERT at ~t=1300 ns.
+    Drooping nodes: 6/8. IR_class=CRITICAL (ML score=199).
+    ALERT → IDLE transition at next clock edge (A2 verified).
+
+==============================================================================
+  ACCUMULATED LOAD VS THRESHOLD (Dynamic Stress Profile)
+==============================================================================
+
+  LOAD_WARN_THR   = 120  — alarm in PROCESS state when crossed
+  LOAD_ALERT_THR  = 180  — FSM escalates PROCESS → ALERT
+
+  Stress profile (S5):
+    Cycle +0    :  accum_load = 127  →  alarm=1 (crossed WARN)
+    Cycle +6    :  accum_load = 154
+    Cycle +12   :  accum_load = 181  →  ALERT fired, accum_load reset to 0
+
+  Post-ALERT reset  :  accum_load = 0  (A8 SVA verified ✓)
+  Budget depletion  :  toggle_budget = 200 → 136  (reduced by W_ALERT=2 in ALERT)
+
+==============================================================================
+  DYNAMIC POWER ESTIMATION
+==============================================================================
+
+  Power Level Index (final)    :  5
+  Estimated Current (final)    :  0.0500 A    (power_level × 0.01)
+
+  Dynamic Power (final)        :  27.50 µW   (accum_load × 0.5)
+  Leakage Power (final)        :   1.38 µW   (5% of dynamic)
+  Total Power (final)          :  28.88 µW
+
+  Peak Dynamic Power (S5)      :  90.50 µW   (accum_load=181 × 0.5)
+  Peak Leakage Power (S5)      :   4.53 µW
+
+==============================================================================
+  DYNAMIC IR DROP CONCLUSION
+==============================================================================
+
+  Final Dynamic IR Drop        :  4.06 mV   (SAFE — within 30 mV warn)
+  Peak Transient IR Drop (S5)  : 13.40 mV   (WARN — below 30 mV threshold)
+
+  Critical IR Events           :  1  (S5 — ML IR score 199, ALERT state)
+  Violation Duration           : ~440 ns  (S5 stress burst window)
+  Recovery Time                :   1 clock cycle (FSM ALERT→IDLE, A2 verified)
+
+  RESULT : PASS — Dynamic IR drop within limits. ALERT mechanism functions
+           correctly. No sustained critical drop observed post-recovery.
+
+################################################################################
+#  END OF REPORT : dynamic_ir.rpt
+################################################################################

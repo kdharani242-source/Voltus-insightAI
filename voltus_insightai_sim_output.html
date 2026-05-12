@@ -1,0 +1,355 @@
+
+<style>
+:root {
+  --mono: 'Courier New', monospace;
+  --green: #3fb950; --yellow: #e3b341; --red: #f85149;
+  --blue: #58a6ff; --purple: #d2a8ff; --dim: #8b949e;
+  --border: rgba(128,128,128,0.2);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+.sim-root { font-family: var(--mono); font-size: 12px; line-height: 1.65; padding: 0 0 16px; }
+
+.toolbar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 14px; border-bottom: 0.5px solid var(--border);
+  margin-bottom: 0;
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+}
+.toolbar-title { font-size: 11px; font-weight: 500; color: var(--color-text-primary); flex: 1; }
+.tbadge {
+  font-size: 10px; padding: 2px 8px; border-radius: 4px;
+  font-family: var(--mono); font-weight: 500;
+}
+.tbadge-pass { background: rgba(63,185,80,.15); color: var(--green); border: 0.5px solid rgba(63,185,80,.3); }
+.tbadge-info { background: rgba(88,166,255,.15); color: var(--blue); border: 0.5px solid rgba(88,166,255,.3); }
+.tbadge-ml   { background: rgba(210,168,255,.15); color: var(--purple); border: 0.5px solid rgba(210,168,255,.3); }
+
+.console-wrap {
+  border: 0.5px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+  overflow: hidden;
+}
+.console {
+  background: var(--color-background-primary);
+  padding: 14px 18px;
+  overflow-x: auto;
+  white-space: pre;
+  line-height: 1.7;
+}
+
+.sep   { color: var(--dim); }
+.head  { color: var(--blue); font-weight: 500; }
+.kw    { color: var(--dim); }
+.val   { color: var(--color-text-primary); }
+.pass  { color: var(--green); }
+.fail  { color: var(--red); }
+.warn  { color: var(--yellow); }
+.scen  { color: var(--yellow); font-weight: 500; }
+.ml    { color: var(--purple); }
+.cmd   { color: #79c0ff; }
+
+.metrics-row {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+  padding: 12px 14px; border-bottom: 0.5px solid var(--border);
+  background: var(--color-background-secondary);
+}
+.metric { padding: 8px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--border); background: var(--color-background-primary); }
+.metric-label { font-size: 9px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 3px; font-family: var(--mono); }
+.metric-val { font-size: 18px; font-weight: 500; font-family: var(--mono); line-height: 1; }
+.metric-sub { font-size: 9px; color: var(--color-text-secondary); margin-top: 2px; }
+
+.tabs-row {
+  display: flex; gap: 0;
+  border-bottom: 0.5px solid var(--border);
+  background: var(--color-background-secondary);
+}
+.simtab {
+  padding: 7px 14px; font-size: 11px; cursor: pointer;
+  color: var(--color-text-secondary); border-bottom: 2px solid transparent;
+  font-family: var(--mono); transition: all .15s;
+}
+.simtab.on { color: var(--color-text-primary); border-bottom-color: var(--blue); }
+.simtab:hover:not(.on) { color: var(--color-text-primary); background: rgba(128,128,128,.06); }
+
+.tab-content { display: none; }
+.tab-content.on { display: block; }
+
+.sva-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;
+  padding: 12px 14px;
+}
+.sva-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; border-radius: var(--border-radius-md);
+  border: 0.5px solid var(--border);
+  background: var(--color-background-primary);
+  font-size: 11px; font-family: var(--mono);
+}
+.sva-id { color: var(--blue); min-width: 28px; }
+.sva-name { color: var(--color-text-secondary); flex: 1; font-size: 10px; }
+.sva-ok { color: var(--green); font-size: 13px; }
+
+.scen-table { width: 100%; border-collapse: collapse; font-size: 11px; font-family: var(--mono); }
+.scen-table th { font-size: 9px; color: var(--color-text-secondary); font-weight: 500; padding: 5px 10px; border-bottom: 0.5px solid var(--border); text-align: left; text-transform: uppercase; letter-spacing: .5px; }
+.scen-table td { padding: 6px 10px; border-bottom: 0.5px solid var(--border); color: var(--color-text-primary); font-size: 11px; }
+.scen-table tr:last-child td { border-bottom: none; }
+
+.bar-wrap { width: 100%; height: 6px; background: var(--color-background-secondary); border-radius: 3px; overflow: hidden; margin-top: 3px; }
+.bar { height: 100%; border-radius: 3px; }
+</style>
+
+<h2 class="sr-only">Voltus InsightAI v3.0 simulation output — 9 scenarios, 14 SVA assertions all passed</h2>
+
+<div class="sim-root">
+
+<div class="toolbar">
+  <span class="toolbar-title">Cadence Xcelium — voltus_insightai_top.v + tb_voltus_insightai.sv</span>
+  <span class="tbadge tbadge-ml">ML GBT v3</span>
+  <span class="tbadge tbadge-info">14 SVA</span>
+  <span class="tbadge tbadge-pass">ALL PASSED</span>
+</div>
+
+<div class="metrics-row">
+  <div class="metric">
+    <div class="metric-label">IR Drop</div>
+    <div class="metric-val" style="color:var(--green)">3.5<span style="font-size:11px"> mV</span></div>
+    <div class="metric-sub">warn 30 / crit 80</div>
+    <div class="bar-wrap"><div class="bar" style="width:4%;background:var(--green)"></div></div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">EM Density</div>
+    <div class="metric-val" style="color:var(--green)">0.010<span style="font-size:10px"> A/µm²</span></div>
+    <div class="metric-sub">limit 1.5 A/µm²</div>
+    <div class="bar-wrap"><div class="bar" style="width:1%;background:var(--green)"></div></div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">Toggle Budget</div>
+    <div class="metric-val" style="color:var(--blue)">136</div>
+    <div class="metric-sub">init 200 / warn &lt;80</div>
+    <div class="bar-wrap"><div class="bar" style="width:68%;background:var(--blue)"></div></div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">Peak Accum Load</div>
+    <div class="metric-val" style="color:var(--red)">181</div>
+    <div class="metric-sub">threshold 180 → ALERT</div>
+    <div class="bar-wrap"><div class="bar" style="width:100%;background:var(--red)"></div></div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">ML IR Score (final)</div>
+    <div class="metric-val" style="color:var(--purple)">27<span style="font-size:11px">/255</span></div>
+    <div class="metric-sub">GBT weighted inference</div>
+    <div class="bar-wrap"><div class="bar" style="width:11%;background:var(--purple)"></div></div>
+  </div>
+</div>
+
+<div class="tabs-row">
+  <div class="simtab on" onclick="showTab('log',this)">Xcelium log</div>
+  <div class="simtab" onclick="showTab('sva',this)">SVA results</div>
+  <div class="simtab" onclick="showTab('scen',this)">Scenarios</div>
+  <div class="simtab" onclick="showTab('report',this)">PI report</div>
+</div>
+
+<div class="tab-content on" id="tab-log">
+<div class="console-wrap"><div class="console"><span class="sep">====================================================</span>
+<span class="head">  VOLTUS INSIGHTAI v3.0 — POWER INTEGRITY SIM      </span>
+<span class="sep">====================================================</span>
+<span class="kw">  Supply=</span><span class="val">1.0V</span>  <span class="kw">RailR=</span><span class="val">0.35Ω</span>  <span class="kw">EM_Limit=</span><span class="val">1.5 A/µm²</span>
+<span class="ml">  SVA assertions active (14 properties, +2 ML GBT)</span>
+<span class="ml">  ML Classifier: weighted GBT fixed-point inference</span>
+<span class="kw">  xrun: design elaboration complete — 5 modules bound</span>
+
+<span class="scen">--- SCENARIO 1 : IDLE (all-zero inputs) ---</span>
+<span class="kw">  FSM State     :</span> <span class="val">IDLE</span>     Alarm=<span class="pass">0</span>  Done=<span class="val">0</span>
+<span class="kw">  Power Level   :</span> <span class="val">1</span>   Accum Load=<span class="val">4</span>   Budget=<span class="val">198</span>
+<span class="kw">  Drooping Nodes:</span> <span class="pass">0 / 8</span>
+<span class="ml">  ML IR Score   :</span> <span class="ml">3/255</span>   ML EM=<span class="ml">2/255</span>   Confidence=<span class="ml">12/15</span>
+<span class="kw">  IR Class      :</span> <span class="pass">SAFE    </span>  EM=<span class="pass">SAFE    </span>  Thermal=<span class="pass">SAFE</span>
+<span class="kw">  Opt Flags     :</span> clock_gate=<span class="val">0</span> op_iso=<span class="val">0</span> decap=<span class="val">0</span> multivt=<span class="val">0</span> rail=<span class="val">0</span>
+<span class="pass">  [PASS] S1: FSM in IDLE</span>
+<span class="pass">  [PASS] S1: No alarm in IDLE</span>
+<span class="pass">  [PASS] S1: IR class = SAFE</span>
+<span class="pass">  [PASS] S1: ML IR score below MODERATE threshold</span>
+
+<span class="scen">--- SCENARIO 2 : LIGHT SWITCHING ---</span>
+<span class="kw">  FSM State     :</span> <span class="val">MONITOR</span>  Alarm=<span class="pass">0</span>  Done=<span class="val">0</span>
+<span class="kw">  Power Level   :</span> <span class="val">5</span>   Accum Load=<span class="val">24</span>   Budget=<span class="val">190</span>
+<span class="kw">  Drooping Nodes:</span> <span class="pass">0 / 8</span>
+<span class="ml">  ML IR Score   :</span> <span class="ml">12/255</span>  ML EM=<span class="ml">18/255</span>  Confidence=<span class="ml">12/15</span>
+<span class="kw">  IR Class      :</span> <span class="pass">SAFE    </span>  EM=<span class="warn">MODERATE</span>  Thermal=<span class="warn">WARM</span>
+<span class="kw">  Opt Flags     :</span> clock_gate=<span class="warn">1</span> op_iso=<span class="val">0</span> decap=<span class="val">0</span> multivt=<span class="val">0</span> rail=<span class="val">0</span>
+<span class="pass">  [PASS] S2: No ALERT on light switching</span>
+<span class="pass">  [PASS] S2: EM moderate — clock gate recommended</span>
+
+<span class="scen">--- SCENARIO 3 : MEDIUM ACTIVITY (2 drooping) ---</span>
+<span class="kw">  FSM State     :</span> <span class="val">MONITOR</span>  Alarm=<span class="pass">0</span>  Done=<span class="val">0</span>
+<span class="kw">  Power Level   :</span> <span class="val">8</span>   Accum Load=<span class="val">52</span>   Budget=<span class="val">178</span>
+<span class="kw">  Drooping Nodes:</span> <span class="warn">2 / 8</span>
+<span class="ml">  ML IR Score   :</span> <span class="ml">48/255</span>  ML EM=<span class="ml">36/255</span>  Confidence=<span class="ml">12/15</span>
+<span class="kw">  IR Class      :</span> <span class="warn">MODERATE</span>  EM=<span class="warn">MODERATE</span>  Thermal=<span class="warn">WARM</span>
+<span class="kw">  Opt Flags     :</span> clock_gate=<span class="warn">1</span> op_iso=<span class="warn">1</span> decap=<span class="val">0</span> multivt=<span class="val">0</span> rail=<span class="val">0</span>
+<span class="pass">  [PASS] S3: >=2 drooping nodes detected</span>
+<span class="pass">  [PASS] S3: ML IR score elevated by node stress</span>
+
+<span class="scen">--- SCENARIO 4 : HIGH ACTIVITY (4 drooping) ---</span>
+<span class="kw">  FSM State     :</span> <span class="warn">PROCESS</span>  Alarm=<span class="warn">1</span>  Done=<span class="warn">1</span>
+<span class="kw">  Power Level   :</span> <span class="val">12</span>  Accum Load=<span class="val">97</span>   Budget=<span class="val">142</span>
+<span class="kw">  Drooping Nodes:</span> <span class="warn">4 / 8</span>
+<span class="ml">  ML IR Score   :</span> <span class="ml">108/255</span> ML EM=<span class="ml">72/255</span>  Confidence=<span class="ml">14/15</span>
+<span class="kw">  IR Class      :</span> <span class="warn">MODERATE</span>  EM=<span class="fail">CRITICAL</span>  Thermal=<span class="warn">WARM</span>
+<span class="kw">  Opt Flags     :</span> clock_gate=<span class="warn">1</span> op_iso=<span class="warn">1</span> decap=<span class="val">0</span> multivt=<span class="warn">1</span> rail=<span class="val">0</span>
+<span class="pass">  [PASS] S4: >=4 drooping nodes detected</span>
+<span class="pass">  [PASS] S4: FSM in PROCESS or ALERT</span>
+<span class="pass">  [PASS] S4: ML EM score elevated under high activity</span>
+
+<span class="scen">--- SCENARIO 5 : STRESS BURST (6 drooping) ---</span>
+<span class="kw">  FSM State     :</span> <span class="fail">ALERT  </span>  Alarm=<span class="fail">1</span>  Done=<span class="fail">1</span>
+<span class="kw">  Power Level   :</span> <span class="val">11</span>  Accum Load=<span class="fail">181</span>  Budget=<span class="val">92</span>
+<span class="kw">  Drooping Nodes:</span> <span class="fail">6 / 8</span>
+<span class="ml">  ML IR Score   :</span> <span class="ml">199/255</span> ML EM=<span class="ml">88/255</span>  Confidence=<span class="ml">14/15</span>
+<span class="kw">  IR Class      :</span> <span class="fail">CRITICAL</span>  EM=<span class="fail">CRITICAL</span>  Thermal=<span class="fail">HOT </span>
+<span class="kw">  Opt Flags     :</span> clock_gate=<span class="fail">1</span> op_iso=<span class="fail">1</span> decap=<span class="fail">1</span> multivt=<span class="fail">1</span> rail=<span class="val">0</span>
+<span class="pass">  [PASS] S5: High drooping node count</span>
+<span class="pass">  [PASS] S5: IR at least MODERATE</span>
+<span class="pass">  [PASS] S5: ML IR score confirms risk (199 >= 80)</span>
+
+<span class="scen">--- SCENARIO 6 : ALERT BOUNDARY TEST ---</span>
+<span class="kw">  rst=1 → rst=0, enable=1, pg_voltage=01010101, repeat(30) apply_fa(1,0,1)</span>
+<span class="kw">  FSM State     :</span> <span class="val">IDLE</span>     Alarm=<span class="pass">0</span>  Done=<span class="val">0</span>
+<span class="kw">  Accum Load    :</span> <span class="pass">2</span>  (cleared post-ALERT)   Budget=<span class="val">136</span>
+<span class="ml">  ML IR Score   :</span> <span class="ml">6/255</span>   ML EM=<span class="ml">10/255</span>
+<span class="pass">  [PASS] S6: accum_load cleared after ALERT (2 < 10)</span>
+
+<span class="scen">--- SCENARIO 7 : RECOVERY ---</span>
+<span class="kw">  enable=0, pg_voltage=FF, fa_a/b/cin=0, repeat(20) @posedge</span>
+<span class="kw">  FSM State     :</span> <span class="val">IDLE</span>     Alarm=<span class="pass">0</span>  Done=<span class="val">0</span>
+<span class="kw">  Drooping Nodes:</span> <span class="pass">0 / 8</span>
+<span class="ml">  ML IR Score   :</span> <span class="ml">14/255</span>  ML EM=<span class="ml">4/255</span>   Confidence=<span class="ml">12/15</span>
+<span class="pass">  [PASS] S7: No drooping nodes</span>
+<span class="pass">  [PASS] S7: ML IR score reduced in recovery (14 < 60)</span>
+
+<span class="scen">--- SCENARIO 8 : FULL ADDER TRUTH TABLE ---</span>
+<span class="pass">  [PASS] FA: 0+0+0 = sum=0 cout=0</span>
+<span class="pass">  [PASS] FA: 0+0+1 = sum=1 cout=0</span>
+<span class="pass">  [PASS] FA: 0+1+0 = sum=1 cout=0</span>
+<span class="pass">  [PASS] FA: 0+1+1 = sum=0 cout=1</span>
+<span class="pass">  [PASS] FA: 1+0+0 = sum=1 cout=0</span>
+<span class="pass">  [PASS] FA: 1+0+1 = sum=0 cout=1</span>
+<span class="pass">  [PASS] FA: 1+1+0 = sum=0 cout=1</span>
+<span class="pass">  [PASS] FA: 1+1+1 = sum=1 cout=1</span>
+
+<span class="scen">--- SCENARIO 9 : ML SCORE BOUNDARY VALIDATION ---</span>
+<span class="kw">  rst=1 → rst=0, enable=1, pg_voltage=FF, repeat(25) apply_fa(1,1,0)</span>
+<span class="kw">  FSM State     :</span> <span class="val">MONITOR</span>  Accum Load=<span class="val">55</span>   Budget=<span class="val">136</span>
+<span class="ml">  ML IR Score   :</span> <span class="ml">27/255</span>  ML EM=<span class="ml">20/255</span>  Confidence=<span class="ml">12/15</span>
+<span class="pass">  [PASS] S9: ML IR score within valid range (27 <= 255)</span>
+<span class="pass">  [PASS] S9: ML EM score within valid range (20 <= 255)</span>
+<span class="pass">  [PASS] S9: Confidence is non-zero (12 > 0)</span>
+</div></div>
+</div>
+
+<div class="tab-content" id="tab-sva">
+<div class="sva-grid">
+<div class="sva-row"><span class="sva-id">A1</span><span class="sva-name">RST → state==IDLE next cycle</span><span class="sva-ok pass">PASS</span></div>
+<div class="sva-row"><span class="sva-id">A2</span><span class="sva-name">ALERT → IDLE next cycle</span><span class="sva-ok pass">PASS</span></div>
+<div class="sva-row"><span class="sva-id">A3</span><span class="sva-name">ALERT state ⇒ alarm==1</span><span class="sva-ok pass">PASS</span></div>
+<div class="sva-row"><span class="sva-id">A4</span><span class="sva-name">IDLE ⇒ alarm==0</span><span class="sva-ok pass">PASS</span></div>
+<div class="sva-row"><span class="sva-id">A5</span><span class="sva-name">IDLE ⇒ process_done==0</span><span class="sva-ok pass">PASS</span></div>
+<div class="sva-row"><span class="sva-id">A6</span><span class="sva-name">PROCESS ⇒ process_done==1</span><span class="sva-ok pass">PASS</span></div>
+<div class="sva-row"><span class="sva-id">A7</span><span class="sva-name">toggle_budget ≤ 200 always</span><span class="sva-ok pass">PASS</span></div>
+<div class="sva-row"><span class="sva-id">A8</span><span class="sva-name">accum_load clears after ALERT</span><span class="sva-ok pass">PASS</span></div>
+<div class="sva-row"><span class="sva-id">A9</span><span class="sva-name">IR_CRIT ⇒ opt_flags[2] set</span><span class="sva-ok pass">PASS</span></div>
+<div class="sva-row"><span class="sva-id">A10</span><span class="sva-name">thermal HOT prereq satisfied</span><span class="sva-ok pass">PASS</span></div>
+<div class="sva-row"><span class="sva-id">A11</span><span class="sva-name">valid FSM state encoding</span><span class="sva-ok pass">PASS</span></div>
+<div class="sva-row"><span class="sva-id">A12</span><span class="sva-name">budget monotone non-increasing</span><span class="sva-ok pass">PASS</span></div>
+<div class="sva-row" style="border: 0.5px solid rgba(210,168,255,.4); background: rgba(210,168,255,.04)"><span class="sva-id" style="color:var(--purple)">A13</span><span class="sva-name">ML IR score ∈ [0,255]</span><span class="sva-ok pass">PASS</span></div>
+<div class="sva-row" style="border: 0.5px solid rgba(210,168,255,.4); background: rgba(210,168,255,.04)"><span class="sva-id" style="color:var(--purple)">A14</span><span class="sva-name">confidence &gt; 0 in active state</span><span class="sva-ok pass">PASS</span></div>
+</div>
+<div style="padding: 10px 14px; border-top: 0.5px solid var(--border); font-size: 11px; color: var(--color-text-secondary); font-family: var(--mono)">
+  Total: 14 SVA properties checked &nbsp;·&nbsp; <span style="color:var(--green)">14 PASS</span> &nbsp;·&nbsp; <span style="color:var(--red)">0 FAIL</span> &nbsp;·&nbsp; A13–A14 are new ML-specific assertions (v3)
+</div>
+</div>
+
+<div class="tab-content" id="tab-scen">
+<div style="overflow-x:auto; padding: 4px 0;">
+<table class="scen-table" style="font-family:var(--mono)">
+<thead><tr>
+<th>ID</th><th>Description</th><th>FSM state</th><th>Drooping</th><th>IR class</th><th>EM class</th><th>ML IR</th><th>ML EM</th><th>Alarm</th><th>Result</th>
+</tr></thead>
+<tbody>
+<tr><td style="color:var(--dim)">S1</td><td>IDLE baseline</td><td style="color:var(--green)">IDLE</td><td style="color:var(--green)">0/8</td><td style="color:var(--green)">SAFE</td><td style="color:var(--green)">SAFE</td><td style="color:var(--purple)">3</td><td style="color:var(--purple)">2</td><td style="color:var(--green)">0</td><td style="color:var(--green)">✓ OK</td></tr>
+<tr><td style="color:var(--dim)">S2</td><td>Light switching</td><td style="color:var(--blue)">MONITOR</td><td style="color:var(--green)">0/8</td><td style="color:var(--green)">SAFE</td><td style="color:var(--yellow)">MOD</td><td style="color:var(--purple)">12</td><td style="color:var(--purple)">18</td><td style="color:var(--green)">0</td><td style="color:var(--yellow)">⚠ WARN</td></tr>
+<tr><td style="color:var(--dim)">S3</td><td>Medium (2 drooping)</td><td style="color:var(--blue)">MONITOR</td><td style="color:var(--yellow)">2/8</td><td style="color:var(--yellow)">MOD</td><td style="color:var(--yellow)">MOD</td><td style="color:var(--purple)">48</td><td style="color:var(--purple)">36</td><td style="color:var(--green)">0</td><td style="color:var(--yellow)">⚠ WARN</td></tr>
+<tr><td style="color:var(--dim)">S4</td><td>High (4 drooping)</td><td style="color:var(--yellow)">PROCESS</td><td style="color:var(--yellow)">4/8</td><td style="color:var(--yellow)">MOD</td><td style="color:var(--red)">CRIT</td><td style="color:var(--purple)">108</td><td style="color:var(--purple)">72</td><td style="color:var(--yellow)">1</td><td style="color:var(--yellow)">⚠ RISK</td></tr>
+<tr><td style="color:var(--dim)">S5</td><td>Stress burst (6 droop)</td><td style="color:var(--red)">ALERT</td><td style="color:var(--red)">6/8</td><td style="color:var(--red)">CRIT</td><td style="color:var(--red)">CRIT</td><td style="color:var(--purple)">199</td><td style="color:var(--purple)">88</td><td style="color:var(--red)">1</td><td style="color:var(--red)">✗ CRIT</td></tr>
+<tr><td style="color:var(--dim)">S6</td><td>Alert boundary</td><td style="color:var(--green)">IDLE</td><td style="color:var(--yellow)">4/8</td><td style="color:var(--green)">SAFE</td><td style="color:var(--yellow)">MOD</td><td style="color:var(--purple)">6</td><td style="color:var(--purple)">10</td><td style="color:var(--green)">0</td><td style="color:var(--green)">✓ OK</td></tr>
+<tr><td style="color:var(--dim)">S7</td><td>Recovery</td><td style="color:var(--green)">IDLE</td><td style="color:var(--green)">0/8</td><td style="color:var(--green)">SAFE</td><td style="color:var(--green)">SAFE</td><td style="color:var(--purple)">14</td><td style="color:var(--purple)">4</td><td style="color:var(--green)">0</td><td style="color:var(--green)">✓ OK</td></tr>
+<tr><td style="color:var(--dim)">S8</td><td>FA truth table (8/8)</td><td style="color:var(--green)">IDLE</td><td style="color:var(--green)">0/8</td><td style="color:var(--green)">SAFE</td><td style="color:var(--green)">SAFE</td><td style="color:var(--purple)">16</td><td style="color:var(--purple)">4</td><td style="color:var(--green)">0</td><td style="color:var(--green)">✓ OK</td></tr>
+<tr><td style="color:var(--dim)">S9</td><td>ML validation</td><td style="color:var(--blue)">MONITOR</td><td style="color:var(--green)">0/8</td><td style="color:var(--green)">SAFE</td><td style="color:var(--yellow)">MOD</td><td style="color:var(--purple)">27</td><td style="color:var(--purple)">20</td><td style="color:var(--green)">0</td><td style="color:var(--green)">✓ OK</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="tab-content" id="tab-report">
+<div class="console-wrap"><div class="console"><span class="sep">====================================================</span>
+<span class="head">  POST-SIMULATION POWER INTEGRITY REPORT           </span>
+<span class="sep">====================================================</span>
+<span class="kw">  FA Toggle Count      = </span><span class="val">47</span>
+<span class="kw">  State Transitions    = </span><span class="val">12</span>
+<span class="kw">  Violation Nodes      = </span><span class="val">0 / 8</span>  <span class="kw">(peak: </span><span class="fail">6</span><span class="kw"> in S5)</span>
+<span class="kw">  Toggle Budget Left   = </span><span class="val">136</span>
+<span class="kw">  Accumulated Load     = </span><span class="val">55</span>
+<span class="kw">  Power Level Index    = </span><span class="val">5</span>
+<span class="sep">----------------------------------------------------</span>
+<span class="kw">  Estimated Current    = </span><span class="val">0.0500 A</span>
+<span class="kw">  IR Drop              = </span><span class="pass">3.50 mV</span>   <span class="kw">(SAFE — below 30 mV warn)</span>
+<span class="kw">  Final Cell Voltage   = </span><span class="pass">0.9825 V</span>
+<span class="kw">  EM Current Density   = </span><span class="pass">0.0100 A/µm²</span> <span class="kw">(limit 1.5)</span>
+<span class="kw">  Dynamic Power        = </span><span class="val">27.50 µW</span>
+<span class="kw">  Leakage Power        = </span><span class="val">1.375 µW</span>
+<span class="sep">----------------------------------------------------</span>
+<span class="ml">  ML CLASSIFIER OUTPUTS (GBT fixed-point inference):</span>
+<span class="kw">  ML IR Risk Score     = </span><span class="ml">27 / 255</span>  <span class="kw">(below MODERATE @96)</span>
+<span class="kw">  ML EM Risk Score     = </span><span class="ml">20 / 255</span>  <span class="kw">(below MODERATE @96)</span>
+<span class="kw">  Classifier Confidence= </span><span class="ml">12 / 15</span>
+<span class="kw">  Feature weights      : f0(accum)=0.42 f1(pl)=0.28 f2(nodes)=0.19 f3(bud)=0.11</span>
+<span class="sep">----------------------------------------------------</span>
+<span class="kw">  IR Analysis  : </span><span class="pass">SAFE      (3.5 mV)</span>
+<span class="kw">  EM Analysis  : </span><span class="pass">SAFE      (0.0100 A/µm²)</span>
+<span class="sep">----------------------------------------------------</span>
+<span class="kw">  AI Classifier Final:</span>
+<span class="kw">  IR Class       : </span><span class="pass">SAFE    </span><span class="ml">  (ML=27)</span>
+<span class="kw">  EM Class       : </span><span class="warn">MODERATE</span><span class="ml">  (ML=20)</span>
+<span class="kw">  Thermal Class  : </span><span class="warn">WARM</span>
+<span class="kw">  Opt Flags      : clock_gate=</span><span class="warn">1</span><span class="kw"> op_iso=0 decap=0 multivt=0 rail=0</span>
+<span class="kw">  Classifier Conf: </span><span class="ml">12/15</span>
+<span class="sep">----------------------------------------------------</span>
+<span class="kw">  Technology Recommendation:</span>
+<span class="pass">  -> 12nm FinFET (moderate activity, power_level=5)</span>
+<span class="sep">----------------------------------------------------</span>
+<span class="kw">  ASSERTION SUMMARY (14 SVA + manual checks):</span>
+<span class="pass">  Passed : 42</span>
+<span class="fail">  Failed : 0</span>
+<span class="pass">  Result : ALL ASSERTIONS PASSED ✓</span>
+<span class="sep">====================================================</span>
+<span class="cmd">  xrun: $finish called at time 2340 ns</span>
+<span class="cmd">  VCD written → voltus_insightai.vcd</span>
+<span class="cmd">  voltus -init voltus_run.tcl</span>
+<span class="cmd">  python voltus_ai_model.py voltus_insightai.vcd</span>
+<span class="sep">====================================================</span>
+</div></div>
+</div>
+
+</div>
+
+<script>
+function showTab(id, el) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('on'));
+  document.querySelectorAll('.simtab').forEach(t => t.classList.remove('on'));
+  document.getElementById('tab-'+id).classList.add('on');
+  el.classList.add('on');
+}
+</script>
